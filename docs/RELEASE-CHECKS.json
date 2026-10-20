@@ -1,0 +1,25 @@
+{
+  "date": "2026-10-20",
+  "version": "0.1.0",
+  "edition": "generic-open-source",
+  "license": "MIT; identified eve scaffold retains Apache-2.0",
+  "checks": {
+    "typecheck": "PASS",
+    "regression": {
+      "result": "PASS",
+      "tests": 30,
+      "passed": 30,
+      "failed": 0
+    },
+    "eveBuild": "PASS",
+    "verificationStandardUnchanged": "PASS",
+    "explicitSourceAllowlist": "PASS",
+    "knownPersonalIdentifiers": "NONE_FOUND",
+    "highConfidenceCredentialPatterns": "NONE_FOUND",
+    "thirdPartyReferenceFiles": "EXCLUDED"
+  },
+  "scope": "Local synthetic verification and targeted source review; not an independent security audit or a production acceptance test.",
+  "externalIntegrations": "NOT_VALIDATED_FOR_THIS_EDITION",
+  "publication": "PENDING",
+  "productionReady": false
+}

@@ -1,0 +1,85 @@
+name: life-coach
+services:
+  db:
+    image: postgres:18-bookworm
+    environment:
+      POSTGRES_DB: life_coach
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+      MIGRATOR_PASSWORD_FILE: /run/secrets/migrator_password
+      APP_PASSWORD_FILE: /run/secrets/app_password
+    secrets:
+      - postgres_password
+      - migrator_password
+      - app_password
+    volumes:
+      - pg_data:/var/lib/postgresql
+      - ./deploy/init-roles.sh:/docker-entrypoint-initdb.d/10-roles.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL","pg_isready -U postgres -d life_coach"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    mem_limit: 768m
+    restart: unless-stopped
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+  migrate:
+    build: .
+    profiles: ["setup"]
+    command: ["node","src/cli.ts","migrate"]
+    environment:
+      DATABASE_URL_FILE: /run/secrets/database_url_migrator
+    secrets: [database_url_migrator]
+    depends_on:
+      db:
+        condition: service_healthy
+  bot:
+    build: .
+    environment:
+      DATABASE_URL_FILE: /run/secrets/database_url
+      TELEGRAM_BOT_TOKEN_FILE: /run/secrets/telegram_token
+      TELEGRAM_ALLOWED_USER_ID: ${TELEGRAM_ALLOWED_USER_ID:?configure numeric owner}
+      TELEGRAM_PRIVATE_CHAT_ID: ${TELEGRAM_PRIVATE_CHAT_ID:?configure private chat}
+      OPENAI_MODEL: ${OPENAI_MODEL:?select an eligible model}
+      SIWC_ELIGIBILITY_CONFIRMED: ${SIWC_ELIGIBILITY_CONFIRMED:-no}
+      SIWC_CREDENTIAL_FILE: /app/credentials/siwc.enc.json
+      SIWC_VAULT_KEY_FILE: /run/secrets/vault_key
+    secrets: [database_url,telegram_token,vault_key]
+    volumes:
+      - ./credentials:/app/credentials:rw
+    depends_on:
+      db:
+        condition: service_healthy
+    init: true
+    read_only: true
+    tmpfs: ["/tmp:size=32m"]
+    cap_drop: ["ALL"]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 768m
+    stop_grace_period: 70s
+    restart: unless-stopped
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+secrets:
+  postgres_password:
+    file: ./secrets/postgres.password
+  migrator_password:
+    file: ./secrets/migrator.password
+  app_password:
+    file: ./secrets/app.password
+  database_url:
+    file: ./secrets/database-url
+  database_url_migrator:
+    file: ./secrets/migrator-url
+  telegram_token:
+    file: ./secrets/telegram.token
+  vault_key:
+    file: ./secrets/vault.key
+volumes:
+  pg_data:
+

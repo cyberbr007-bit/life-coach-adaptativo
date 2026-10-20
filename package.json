@@ -1,0 +1,46 @@
+{
+  "name": "life-coach-adaptativo",
+  "version": "0.1.0",
+  "type": "module",
+  "imports": {
+    "#*": "./agent/*",
+    "#evals/*": "./evals/*"
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "eval": "eve eval",
+    "start": "node --env-file-if-exists=.env src/cli.ts serve",
+    "typecheck": "tsc --noEmit",
+    "eve:dev": "eve dev",
+    "eve:build": "eve build",
+    "doctor": "node --env-file-if-exists=.env src/cli.ts doctor",
+    "cli": "node --env-file-if-exists=.env src/cli.ts",
+    "test": "node --test --test-concurrency=1 tests/*.test.ts",
+    "verify": "node scripts/verify.mjs"
+  },
+  "dependencies": {
+    "@ai-sdk/provider": "4.0.31",
+    "@chat-adapter/state-pg": "4.43.0",
+    "@chat-adapter/telegram": "4.43.0",
+    "@vercel/connect": "2.5.2",
+    "ai": "7.0.146",
+    "chat": "4.43.0",
+    "eve": "0.81.1",
+    "jose": "6.2.13",
+    "pg": "8.23.1",
+    "zod": "4.5.4"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.10",
+    "@types/node": "24.19.2",
+    "@types/pg": "8.23.1",
+    "just-bash": "3.6.0",
+    "typescript": "7.0.2"
+  },
+  "engines": {
+    "node": "24.x"
+  },
+  "private": true,
+  "license": "MIT",
+  "description": "Self-hosted personal coaching foundation with auditable PostgreSQL memory and a private Telegram interface."
+}

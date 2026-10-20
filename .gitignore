@@ -1,0 +1,35 @@
+node_modules
+.env*
+.eve
+.vercel
+.next
+.output
+.nitro
+dist
+.DS_Store
+*.tsbuildinfo
+
+# User data and credentials
+.env
+.env.*
+!.env.example
+secrets/
+credentials/
+*.zip
+*.log
+.eve/
+.output/
+
+# Local operational data
+backups/
+exports/
+pg_data/
+*.dump
+*.bak
+*.enc.json
+*.pem
+*.key
+__pycache__/
+*.pyc
+docs/VALIDACAO.json
+docs/validation-logs/
