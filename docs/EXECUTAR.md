@@ -60,11 +60,19 @@ Antes dos comandos Compose, .env deve conter IDs numéricos, modelo selecionado 
 
 ```bash
 docker compose build
-docker compose up -d db
+bash scripts/prepare-compose-secrets.sh
+docker compose --profile setup run --rm --no-deps --entrypoint node migrate -e 'require("node:fs").accessSync(process.env.DATABASE_URL_FILE, require("node:fs").constants.R_OK); console.log("Segredo de migração legível.")'
+docker compose up -d --wait db
 docker compose --profile setup run --rm migrate
 ```
 
 Use um volume novo e dedicado. Nunca reutilize o volume de outro projeto. Papéis são criados apenas na inicialização de um volume vazio. Alterar uma senha em arquivo não altera um banco já provisionado.
+
+Execute a preparação de permissões como root em Docker Linux sem remapeamento de usuários. Segredos de arquivo do Compose preservam a propriedade no host: o script consulta o UID/GID PostgreSQL na imagem configurada e atribui a ele os três arquivos de senha do bootstrap, mantendo modo 0600. O migrador usa UID/GID 1000 e recebe apenas seu arquivo de URL. O diretório secrets permanece privado. O script testa a leitura das senhas no container sem iniciar o banco nem exibir seus conteúdos. Repita depois de trocar a imagem do banco ou recriar os arquivos. Docker rootless ou userns-remap requer mapeamento próprio; este procedimento não os provisiona.
+
+Se uma inicialização anterior falhou, inspecione o estado e os logs antes de continuar. Não apague o volume nem espere que reiniciar execute novamente scripts de bootstrap em um banco já inicializado.
+
+A regressão do configurador pode ser executada com `python3 -m unittest discover -s tests -p 'test_config_permissions.py' -v`. Há uma verificação com chamadas de propriedade simuladas e três testes de acesso por UID que exigem Linux com root e suporte a chown/setuid. Esses três são marcados como ignorados quando o host não oferece esse suporte. Eles usam arquivos sintéticos e um substituto de Docker; a prova de leitura no Compose real é um gate separado, executado pelo script de preparação.
 
 O banco não publica porta no host. A aplicação usa lc_runtime; migrações usam lc_owner. Confirme isolamento e permissões. Prepare e teste backup externo e restauração com dados sintéticos antes de armazenar dados pessoais continuamente.
 

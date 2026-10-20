@@ -48,10 +48,11 @@ if not (root/'.env').exists():
 # Local Compose file-backed secrets preserve host ownership.
 if hasattr(os,'geteuid') and os.geteuid()==0:
     os.chown(creds,1000,1000)
-    for name in ('database-url','telegram.token','vault.key'):
+    for name in ('database-url','migrator-url','telegram.token','vault.key'):
         os.chown(sec/name,1000,1000)
     for path in creds.iterdir():
         if path.is_file(): os.chown(path,1000,1000)
 print('Configuração privada preparada. Nenhum serviço foi iniciado.')
 print('Conecte o ChatGPT localmente, selecione o modelo e siga docs/EXECUTAR.md.')
+print('Antes de iniciar o banco, execute bash scripts/prepare-compose-secrets.sh como root.')
 
